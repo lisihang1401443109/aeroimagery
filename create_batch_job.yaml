@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pvc-test-job
+spec:
+  completions: 1   # Only 1 pod is required to complete the job
+  parallelism: 1   # Only 1 pod runs at a time
+  template:
+    metadata:
+      name: pvc-test-job-pod
+    spec:
+      containers:
+      - name: pvc-test-container
+        image: gitlab-registry.nrp-nautilus.io/nrp/scientific-images/python
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            #!/bin/bash
+            source activate base;
+            conda activate /mnt/data/conda_env/synrs3d;
+            cd /mnt/data/SynRS3D;
+            which python;
+            bash /mnt/data/SynRS3D/sourceonly.sh >> /mnt/data/job_output_source_only.log 2>&1;
+            bash /mnt/data/SynRS3D/RS3DAda.sh >> /mnt/data/job_output_ada.log 2>&1;
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "16Gi"
+            cpu: "4"
+          requests:
+            nvidia.com/gpu: 1
+            memory: "16Gi"
+            cpu: "4"
+        volumeMounts:
+        - mountPath: /mnt/data
+          name: pvc-storage
+        securityContext:
+          runAsUser: 0
+      volumes:
+      - name: pvc-storage
+        persistentVolumeClaim:
+          claimName: synrs3d-test
+      restartPolicy: Never
+  backoffLimit: 1

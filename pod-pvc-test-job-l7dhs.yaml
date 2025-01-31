@@ -1,0 +1,153 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: 994cbc84a7e968738a2c79bea29047b4f1db21772d68030895b3d44ac390e18f
+    cni.projectcalico.org/podIP: ""
+    cni.projectcalico.org/podIPs: ""
+  creationTimestamp: "2025-01-14T22:22:04Z"
+  generateName: pvc-test-job-
+  labels:
+    batch.kubernetes.io/controller-uid: 9f1e64be-b3bb-4d0d-9bce-d5302b4c8457
+    batch.kubernetes.io/job-name: pvc-test-job
+    controller-uid: 9f1e64be-b3bb-4d0d-9bce-d5302b4c8457
+    job-name: pvc-test-job
+  name: pvc-test-job-l7dhs
+  namespace: gp-engine-malof
+  ownerReferences:
+  - apiVersion: batch/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Job
+    name: pvc-test-job
+    uid: 9f1e64be-b3bb-4d0d-9bce-d5302b4c8457
+  resourceVersion: "9344855423"
+  uid: 2e413773-cba4-45ed-ad86-597270ac69b6
+spec:
+  containers:
+  - args:
+    - |
+      #!/bin/bash
+      source activate base;
+      conda activate /mnt/data/conda_env/synrs3d;
+      cd /mnt/data/SynRS3D;
+      which python;
+      bash /mnt/data/SynRS3D/sourceonly.sh >> /mnt/data/job_output_source_only.log;
+      bash /mnt/data/SynRS3D/RS3dAda.sh >> /mnt/data/job_output_ada.log;
+    command:
+    - /bin/bash
+    - -c
+    image: gitlab-registry.nrp-nautilus.io/nrp/scientific-images/python
+    imagePullPolicy: Always
+    name: pvc-test-container
+    resources:
+      limits:
+        cpu: "4"
+        memory: 16Gi
+        nvidia.com/gpu: "1"
+      requests:
+        cpu: "4"
+        memory: 16Gi
+        nvidia.com/gpu: "1"
+    securityContext:
+      runAsUser: 0
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /mnt/data
+      name: pvc-storage
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-2c8fz
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: fiona8.ucsc.edu
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: PreferNoSchedule
+    key: nvidia.com/gpu
+    operator: Exists
+  - effect: NoSchedule
+    key: nautilus.io/gp-engine-malof
+    operator: Exists
+  volumes:
+  - name: pvc-storage
+    persistentVolumeClaim:
+      claimName: synrs3d-test
+  - name: kube-api-access-2c8fz
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2025-01-14T22:22:05Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2025-01-14T22:35:56Z"
+    reason: PodFailed
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2025-01-14T22:35:56Z"
+    reason: PodFailed
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2025-01-14T22:22:05Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://9a12d2d4c22aeff6194621804037c504cdc157b632402ba72f4d118a596fb2f5
+    image: gitlab-registry.nrp-nautilus.io/nrp/scientific-images/python:latest
+    imageID: gitlab-registry.nrp-nautilus.io/nrp/scientific-images/python@sha256:2804d8ddc158f40197d23310c186dbbb963b39bc95826a7b82489681297dca41
+    lastState: {}
+    name: pvc-test-container
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://9a12d2d4c22aeff6194621804037c504cdc157b632402ba72f4d118a596fb2f5
+        exitCode: 127
+        finishedAt: "2025-01-14T22:35:55Z"
+        reason: Error
+        startedAt: "2025-01-14T22:22:14Z"
+  hostIP: 128.114.86.12
+  phase: Failed
+  podIP: 10.244.111.237
+  podIPs:
+  - ip: 10.244.111.237
+  - ip: fdf0:17b3:c3ec:1f79:10:0:3:b02a
+  qosClass: Guaranteed
+  startTime: "2025-01-14T22:22:05Z"
