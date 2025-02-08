@@ -1,18 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pvc-test-job
+  name: sihang-sourceonly-job
   namespace: gp-engine-malof
   labels:
-    job-name: pvc-test-job
+    job-name: sihang-sourceonly-job
 spec:
   parallelism: 1
   completions: 1
-  backoffLimit: 1
+  backoffLimit: 0
   template:
     metadata:
       labels:
-        job-name: pvc-test-job
+        job-name: sihang-sourceonly-job
     spec:
       restartPolicy: Never
       containers:
@@ -29,15 +29,14 @@ spec:
               conda activate /mnt/data/conda_env/synrs3d;
               cd /mnt/data/SynRS3D;
               which python;
-              bash /mnt/data/SynRS3D/sourceonly.sh >> /mnt/data/job_output_source_only.log 2>&1;
-              bash /mnt/data/SynRS3D/RS3DAda.sh >> /mnt/data/job_output_ada.log 2>&1;
+              bash /mnt/data/SynRS3D/sourceonly.sh >> /mnt/data/job_output_source_only_0206.log;
           resources:
             limits:
               cpu: '4'
-              memory: 16Gi
+              memory: 32Gi
               nvidia.com/gpu: '1'
             requests:
-              cpu: '4'
+              cpu: '2'
               memory: 16Gi
               nvidia.com/gpu: '1'
           volumeMounts:

@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sihang-weight-job
+  namespace: gp-engine-malof
+  labels:
+    job-name: sihang-weight-job
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        job-name: sihang-weight-job
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pvc-test-container
+          image: gitlab-registry.nrp-nautilus.io/nrp/scientific-images/python
+          imagePullPolicy: Always
+          command:
+            - /bin/bash
+            - '-c'
+          args:
+            - |
+              #!/bin/bash
+              source activate base;
+              conda activate /mnt/data/conda_env/synrs3d;
+              cd /mnt/data/SynRS3D;
+              which python;
+              # bash /mnt/data/SynRS3D/sourceonly.sh >> /mnt/data/job_output_source_only_0206.log;
+              bash /mnt/data/SynRS3D/eval.sh >> /mnt/data/job_output_weight_0206.log
+          resources:
+            limits:
+              cpu: '4'
+              memory: 32Gi
+              nvidia.com/gpu: '1'
+            requests:
+              cpu: '2'
+              memory: 16Gi
+              nvidia.com/gpu: '1'
+          volumeMounts:
+            - name: pvc-storage
+              mountPath: /mnt/data
+          securityContext:
+              runAsUser: 0
+      volumes:
+        - name: pvc-storage
+          persistentVolumeClaim:
+            claimName: synrs3d-test
+      terminationGracePeriodSeconds: 30
+  ttlSecondsAfterFinished: 86400
